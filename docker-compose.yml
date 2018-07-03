@@ -1,0 +1,32 @@
+version: "3"
+services:
+  teamcity-server:
+    image: jetbrains/teamcity-server
+    volumes:
+    - /opt/teamcity_server/datadir:/data/teamcity_server/datadir
+    - /opt/teamcity_server/logs:/opt/teamcity/logs
+    ports:
+    - "8111:8111"
+    links:
+    - teamcity-client
+    environment:
+      TEAMCITY_SERVER_MEM_OPTS: -Xmx2g -XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=350m
+    deploy:
+      restart_policy: 
+        condition: on-failture
+
+  teamcity-client:
+    privileged: true
+    image: jetbrains/teamcity-agent
+    volumes: 
+    - /opt/teamcity_agent/conf:/data/teamcity_agent/conf 
+    - /var/run/docker.sock:/var/run/docker.sock 
+#	- /opt/buildagent/work:/opt/buildagent/work
+#	- /opt/buildagent/temp:/opt/buildagent/temp
+    environment:
+      SERVER_URL: 10.1.158.174:8111
+    deploy:
+      restart_policy: 
+        condition: on-failture
+#    depends_on:
+#    - teamcity-server
